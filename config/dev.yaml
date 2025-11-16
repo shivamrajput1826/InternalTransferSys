@@ -1,0 +1,15 @@
+# Development Configuration
+port: "8080"
+profile: "dev"
+
+# Database Configuration
+db_host: "localhost"
+db_port: "5433"
+db_user: "postgres"
+db_password: "postgres"
+db_name: "transfers"
+db_sslmode: "disable"
+
+# GORM Configuration
+gorm_log_level: "info"
+

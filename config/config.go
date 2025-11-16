@@ -6,20 +6,27 @@ import (
 )
 
 func LoadConfig() {
-	viper.SetConfigName("yaml")
-	viper.AddConfigPath("./config/")
-	viper.AddConfigPath(".")
-	viper.AddConfigPath("../../config/")
-	viper.AutomaticEnv()
-
+	// Load environment variables first
 	profile := viper.GetString("PROFILE")
 	if profile == "" {
 		profile = "dev"
-		godotenv.Load("./config/.env.dev")
 	}
 
-	viper.SetConfigName(profile)
+	// Try to load .env file
+	envFile := "./config/dev.env"
+	godotenv.Load(envFile)
 
+	// Enable automatic environment variable reading
+	viper.AutomaticEnv()
+
+	// Try to load YAML config if it exists
+	viper.SetConfigName(profile)
+	viper.AddConfigPath("./config/")
+	viper.AddConfigPath(".")
+	viper.AddConfigPath("../../config/")
+
+	// Ignore error if config file doesn't exist
+	_ = viper.ReadInConfig()
 }
 
 func GetConfigValues(key string) string {
