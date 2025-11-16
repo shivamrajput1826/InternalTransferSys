@@ -4,18 +4,19 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"internal-transfer-system/internal/database"
 	"internal-transfer-system/internal/models"
 	"internal-transfer-system/internal/repository"
+
+	"gorm.io/gorm"
 )
 
 type AccountService struct {
 	accountRepo *repository.AccountRepository
 }
 
-func NewAccountService() *AccountService {
+func NewAccountService(db *gorm.DB) *AccountService {
 	return &AccountService{
-		accountRepo: repository.NewAccountRepository(database.GetDB()),
+		accountRepo: repository.NewAccountRepository(db),
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 	"internal-transfer-system/config"
 	"internal-transfer-system/internal/models"
 	customLogger "internal-transfer-system/logger"
+	"sync"
 	"time"
 
 	"gorm.io/driver/postgres"
@@ -15,9 +16,18 @@ import (
 var (
 	DB       *gorm.DB
 	dbLogger = customLogger.CreateLogger("database")
+	once     sync.Once
 )
 
 func InitDB() error {
+	var initErr error
+	once.Do(func() {
+		initErr = initializeDB()
+	})
+	return initErr
+}
+
+func initializeDB() error {
 	dbHost := config.GetConfigValues("DB_HOST")
 	if dbHost == "" {
 		dbHost = "localhost"
@@ -68,7 +78,7 @@ func InitDB() error {
 	})
 	if err != nil {
 		dbLogger.Error(customLogger.LogOptions{
-			MethodName: "InitDB",
+			MethodName: "initializeDB",
 			Details:    fmt.Errorf("failed to connect to database: %w", err),
 		})
 		return fmt.Errorf("failed to connect to database: %w", err)
@@ -77,7 +87,7 @@ func InitDB() error {
 	sqlDB, err := db.DB()
 	if err != nil {
 		dbLogger.Error(customLogger.LogOptions{
-			MethodName: "InitDB",
+			MethodName: "initializeDB",
 			Details:    fmt.Errorf("failed to get underlying sql.DB: %w", err),
 		})
 		return fmt.Errorf("failed to get underlying sql.DB: %w", err)
@@ -90,7 +100,7 @@ func InitDB() error {
 
 	if err := sqlDB.Ping(); err != nil {
 		dbLogger.Error(customLogger.LogOptions{
-			MethodName: "InitDB",
+			MethodName: "initializeDB",
 			Details:    fmt.Errorf("failed to ping database: %w", err),
 		})
 		return fmt.Errorf("failed to ping database: %w", err)
@@ -98,15 +108,13 @@ func InitDB() error {
 
 	DB = db
 	dbLogger.Debug("Successfully connected to PostgreSQL database using GORM", customLogger.LogOptions{
-		MethodName: "InitDB",
+		MethodName: "initializeDB",
 		Details:    "Database connection established",
 	})
 
 	return nil
 }
 
-// AutoMigrate automatically migrates the database schema based on models
-// This is useful for development. For production, use SQL migrations instead.
 func AutoMigrate() error {
 	if DB == nil {
 		return fmt.Errorf("database connection is not initialized")
@@ -129,6 +137,9 @@ func AutoMigrate() error {
 }
 
 func GetDB() *gorm.DB {
+	if DB == nil {
+		panic("database not initialized. Call InitDB() first")
+	}
 	return DB
 }
 
