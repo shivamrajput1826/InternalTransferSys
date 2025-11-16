@@ -1,0 +1,2 @@
+-- Create transactions table migration
+
