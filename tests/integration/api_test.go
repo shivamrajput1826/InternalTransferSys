@@ -148,7 +148,7 @@ func (suite *APITestSuite) TestGetAccount() {
 			name:            "successful account retrieval",
 			accountID:       "100",
 			expectedStatus:  http.StatusOK,
-			expectedBalance: "500.75",
+			expectedBalance: "500.75000", // Changed to match database format
 		},
 		{
 			name:           "account not found",

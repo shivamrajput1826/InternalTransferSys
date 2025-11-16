@@ -31,6 +31,7 @@ func (s *AccountService) CreateAccount(ctx context.Context, req *models.CreateAc
 		if errors.Is(err, repository.ErrAccountAlreadyExists) {
 			return repository.ErrAccountAlreadyExists
 		}
+
 		return fmt.Errorf("failed to create account: %w", err)
 	}
 

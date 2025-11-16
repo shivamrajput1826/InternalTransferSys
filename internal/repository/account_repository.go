@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"internal-transfer-system/internal/models"
+	"strings"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -27,7 +29,13 @@ func NewAccountRepository(db *gorm.DB) *AccountRepository {
 func (r *AccountRepository) Create(ctx context.Context, account *models.Account) error {
 	result := r.db.WithContext(ctx).Create(account)
 	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrDuplicatedKey) {
+		var pgErr *pgconn.PgError
+		if errors.As(result.Error, &pgErr) {
+			if pgErr.Code == "23505" {
+				return ErrAccountAlreadyExists
+			}
+		}
+		if strings.Contains(result.Error.Error(), "UNIQUE constraint failed") {
 			return ErrAccountAlreadyExists
 		}
 		return fmt.Errorf("failed to create account: %w", result.Error)

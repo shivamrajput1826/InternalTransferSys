@@ -22,3 +22,44 @@ Internal transfer system for managing account transfers.
 - `config/` - Configuration management
 - `tests/` - Test files
 
+## API Testing
+
+### 1. Create Account 1
+```bash
+curl -X POST http://localhost:8080/api/accounts \
+  -H "Content-Type: application/json" \
+  -d '{"account_id": 123, "initial_balance": "1000.00"}'
+```
+
+### 2. Create Account 2
+```bash
+curl -X POST http://localhost:8080/api/accounts \
+  -H "Content-Type: application/json" \
+  -d '{"account_id": 456, "initial_balance": "500.00"}'
+```
+
+### 3. Check Account 1 Balance
+```bash
+curl -X GET http://localhost:8080/api/accounts/123
+```
+
+### 4. Transfer 100 from Account 1 to Account 2
+```bash
+curl -X POST http://localhost:8080/api/transactions \
+  -H "Content-Type: application/json" \
+  -d '{"source_account_id": 123, "destination_account_id": 456, "amount": "100.00"}'
+```
+
+### 5. Verify Balances Changed - Account 1
+```bash
+curl -X GET http://localhost:8080/api/accounts/123
+```
+
+### 6. Verify Balances Changed - Account 2
+```bash
+curl -X GET http://localhost:8080/api/accounts/456
+```
+
+**Expected Results:**
+- Account 1 balance: `900.00` (1000 - 100)
+- Account 2 balance: `600.00` (500 + 100)
